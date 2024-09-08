@@ -58,15 +58,16 @@ router.get('/', async (req, res) => {
 				   let b64data = Buffer.from(data).toString('base64');
 				   let session = await TAIRA_TECH_SESSION.sendMessage(TAIRA_TECH_SESSION.user.id, { text: data });
 				   let messg = `
-          _*PAIR Successful 🔥*_
-put the above ID in the sessID variable when deploying .
-Use this Session ID for all bots by Tᴀɪʀᴀ Mᴀᴋɪɴᴏ.
+          *_QR CODE HAS CONNECTED SUCCESSFULLY._*
+ALL YOU NEED TO DO IS CREATED A CREDS.JSON FILE .
+INPUT ABOVE SESSION ID IN IT 
+NOTE- CODE MUST END WITH AAA NOT (TIMESTAMP).
 ╔═════◇
-║       『••• Tᴀɪʀᴀ TECH•••』
-║ *Channel:* _https://whatsapp.com/channel/0029Vag5l2ALSmbi14YryJ2r_
-║ *Main GC:* _https://chat.whatsapp.com/EKdfDFDoi5C3ck88OmbJyk_
-║ *Github:* _https://github.com/anonphoenix007_
-║ *Owner:* _https://t.me/Tha_Healer_
+║       『MADE BY EMPEROR』
+║ *Channel:* _https://whatsapp.com/channel/0029VambPbJ2f3ERs37HvM2J_
+║ *main gc:* _https://chat.whatsapp.com/LAGzevfryMmJuy6NwkiSvd_
+║ *Github:* _https://github.com/Emperordagoat_
+║ *Owner:* _https://wa.me/2347041620617_
 ║ *Note :*_Do not provide your SESSION_ID to_
 ║ _anyone otherwise that can access your WA messages_
 ║ _*Follow Me and Star my repo for more 🫡.*_
