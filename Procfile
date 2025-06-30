@@ -1,1 +1,1 @@
-web: node Maher-Zubair.js
+web: node index.mjs
