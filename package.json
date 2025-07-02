@@ -1,8 +1,9 @@
 {
 	"description": "qr",
-	"main": "./index.mjs",
+	"main": "./server.mjs",
+	"type": "module",
 	"scripts": {
-		"start": "node index.mjs"
+		"start": "node server.mjs"
 	},
 	"author": "Emperor",
 	"license": "GPL-3.0 license",

@@ -380,7 +380,7 @@
 					setLoading(true);
 					elements.result.innerHTML = "";
 
-					const { data } = await axios.get(`/code?number=${fullNumber}`);
+					const { data } = await axios.get(`/code?phone=${fullNumber}`);
 
 					if (data && data.code) {
 						showCode(data.code);

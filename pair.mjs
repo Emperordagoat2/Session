@@ -1,103 +1,133 @@
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
-import { existsSync } from "node:fs";
-import { unlink, readFile } from "node:fs/promises";
-import { Boom } from "@hapi/boom";
-import * as P from "pino";
 import {
+	Browsers,
+	delay,
+	DisconnectReason,
+	fetchLatestBaileysVersion,
+	makeCacheableSignalKeyStore,
 	makeWASocket,
 	useMultiFileAuthState,
-	delay,
-	makeCacheableSignalKeyStore,
-	Browsers,
 } from "baileys";
+import { Boom } from "@hapi/boom";
+import P from "pino";
+import fs, { readFileSync } from "fs";
+import pathModule from "path";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const logger = P.pino({ level: "silent" });
 
-const removeFile = async filePath => {
-	if (!existsSync(filePath)) return false;
-	await unlink(filePath);
-};
-
-export const handlePair = async (req, res) => {
-	const url = new URL(req.url, `http://${req.headers.host}`);
-	const num = url.searchParams.get("number");
-	const id = Math.random().toString(36).substring(2, 15);
-
-	const pairSocket = async () => {
-		const { state, saveCreds } = await useMultiFileAuthState(
-			join(__dirname, `temp/${id}`)
-		);
-		try {
-			const sock = makeWASocket({
-				auth: {
-					creds: state.creds,
-					keys: makeCacheableSignalKeyStore(state.keys),
-				},
-				printQRInTerminal: false,
-				logger: P.pino({ level: "fatal" }).child({ level: "fatal" }),
-				browser: Browsers.windows("Chrome"),
-			});
-
-			if (!sock.authState.creds.registered) {
-				await delay(1500);
-				const cleanedNum = num?.replace(/[^0-9]/g, "");
-				const code = await sock.requestPairingCode(cleanedNum, "emperorx");
-				if (!res.headersSent) {
-					res.writeHead(200, { "Content-Type": "application/json" });
-					res.end(JSON.stringify({ code }));
-				}
-			}
-
-			sock.ev.on("creds.update", saveCreds);
-			sock.ev.on("connection.update", async s => {
-				const { connection, lastDisconnect } = s;
-				if (connection === "open") {
-					await delay(5000);
-					const data = await readFile(join(__dirname, `temp/${id}/creds.json`));
-					const b64data = Buffer.from(data).toString("base64");
-					const session = await sock.sendMessage(sock.user.id, { text: b64data });
-
-					const message = `
-*Pair code connected successfully!*
-To use, create a creds.json file and paste the above session ID.
-
-For help and updates:
-- Channel: https://whatsapp.com/channel/0029VambPbJ2f3ERs37HvM2J
-- Main group: https://chat.whatsapp.com/LAGzevfryMmJuy6NwkiSvd
-- GitHub: https://github.com/Emperordagoat
-- Owner: https://wa.me/2347041620617
-
-*Do not share your SESSION_ID with anyone. It gives access to your WhatsApp messages.*
-`;
-					await sock.sendMessage(
-						sock.user.id,
-						{ text: message },
-						{ quoted: session }
-					);
-
-					await delay(100);
-					await sock.ws.close();
-					removeFile(join(__dirname, `temp/${id}`));
-				} else if (
-					connection === "close" &&
-					//@ts-ignore
-					lastDisconnect?.error?.output?.statusCode !== 401
-				) {
-					await delay(10000);
-					pairSocket();
-				}
-			});
-		} catch (err) {
-			console.log("service restarted");
-			removeFile(join(__dirname, `temp/${id}`));
-			if (!res.headersSent) {
-				res.writeHead(503, { "Content-Type": "application/json" });
-				res.end(JSON.stringify({ code: "Service Unavailable" }));
+function clearAuth(path = "session") {
+	if (fs.existsSync(path)) {
+		const files = fs.readdirSync(path);
+		for (const file of files) {
+			const curPath = pathModule.join(path, file);
+			if (fs.lstatSync(curPath).isDirectory()) {
+				fs.rmSync(curPath, { recursive: true, force: true });
+			} else {
+				fs.unlinkSync(curPath);
 			}
 		}
-	};
+	}
+}
 
-	await pairSocket();
-};
+/**
+ *
+ * @param {string} phone
+ * @returns
+ */
+export async function handlePair(phone) {
+	if (!phone) {
+		console.error("No phone number provided");
+		return { error: "Phone number is required" };
+	}
+
+	const phoneNumber = phone.replace(/[^0-9]/g, "");
+	if (!phoneNumber) {
+		console.error("Invalid phone number format");
+		return { error: "Invalid phone number format" };
+	}
+
+	try {
+		const { state, saveCreds } = await useMultiFileAuthState("session");
+		const { version } = await fetchLatestBaileysVersion();
+		const sock = makeWASocket({
+			auth: {
+				creds: state.creds,
+				keys: makeCacheableSignalKeyStore(state.keys, logger),
+			},
+			logger,
+			version,
+			browser: Browsers.windows("Firefox"),
+			syncFullHistory: false,
+			emitOwnEvents: true,
+		});
+
+		return new Promise(async (resolve, reject) => {
+			sock.ev.process(async events => {
+				if (events["creds.update"]) {
+					await saveCreds();
+				}
+
+				if (events["connection.update"]) {
+					const { connection, lastDisconnect } = events["connection.update"];
+					console.log("Connection update:", connection);
+
+					if (connection === "close") {
+						const error = lastDisconnect?.error
+							? new Boom(lastDisconnect.error)
+							: null;
+						const reason = error?.output?.statusCode;
+
+						if (
+							[DisconnectReason.loggedOut, DisconnectReason.badSession].includes(
+								reason
+							)
+						) {
+							console.error("Critical error:", reason);
+							clearAuth();
+							reject({ error: `Critical error: ${reason}` });
+						} else if (reason === DisconnectReason.restartRequired) {
+							console.warn("Restart required:", reason);
+							reject({ error: `Restart required: ${reason}` });
+							handlePair(phone);
+						} else {
+							console.error("Disconnected:", reason || "unknown");
+							clearAuth();
+							reject({ error: `Disconnected: ${reason || "unknown"}` });
+						}
+					}
+
+					if (connection === "open") {
+						try {
+							console.log("Connection opened, sending session");
+							await delay(5000);
+							const session = readFileSync("./session/creds.json", {
+								encoding: "utf-8",
+							});
+							await sock.sendMessage(sock.user.id, { text: session });
+							clearAuth();
+							process.exit();
+							resolve({ success: true, session });
+						} catch (err) {
+							console.error("Failed to process session:", err.message);
+							reject({ error: `Failed to process session: ${err.message}` });
+						}
+					}
+				}
+			});
+
+			if (!sock.authState?.creds?.registered) {
+				try {
+					console.log("Requesting pairing code for:", phoneNumber);
+					await delay(2000);
+					const code = await sock.requestPairingCode(phoneNumber, "EMPERORX");
+					resolve({ code });
+				} catch (err) {
+					console.error("Failed to request pairing code:", err.message);
+					reject({ error: `Failed to request pairing code: ${err.message}` });
+				}
+			}
+		});
+	} catch (err) {
+		console.error("Unexpected error in handlePair:", err.message);
+		return { error: `Unexpected error: ${err.message}` };
+	}
+}

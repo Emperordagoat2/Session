@@ -1,17 +1,15 @@
-// main.mjs
 import { createServer } from "http";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { readFile } from "fs/promises";
 import { EventEmitter } from "events";
-import { handleQR } from "./qr.mjs";
 import { handlePair } from "./pair.mjs";
 
 EventEmitter.defaultMaxListeners = 500;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 9000;
 
 const serveFile = async (res, filePath) => {
 	try {
@@ -24,16 +22,35 @@ const serveFile = async (res, filePath) => {
 	}
 };
 
+export const handlePairRequest = async (req, res) => {
+	const url = new URL(req.url, `http://${req.headers.host}`);
+	const phone = url.searchParams.get("phone");
+
+	if (!phone) {
+		console.log("❌ Missing phone parameter.");
+		res.writeHead(400, { "Content-Type": "application/json" });
+		return res.end(JSON.stringify({ error: "Phone parameter required" }));
+	}
+
+	console.log(`📞 Spawning with phone: ${phone}`);
+
+	try {
+		const result = JSON.stringify(await handlePair(phone));
+		res.writeHead(200, { "Content-Type": "application/json" });
+		res.end(result);
+	} catch (error) {
+		console.log("❌ Handler error:", error.message);
+		res.writeHead(500, { "Content-Type": "application/json" });
+		res.end(JSON.stringify({ error: error.message }));
+	}
+};
+
 const handleRequest = async (req, res) => {
 	const url = new URL(req.url, `http://${req.headers.host}`);
 	const pathname = url.pathname;
 
-	if (pathname.startsWith("/qr")) {
-		return handleQR(req, res);
-	}
-
 	if (pathname.startsWith("/code")) {
-		return handlePair(req, res);
+		return handlePairRequest(req, res);
 	}
 
 	if (pathname === "/pair") {
