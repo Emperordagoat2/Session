@@ -118,7 +118,7 @@ export async function handlePair(phone) {
 				try {
 					console.log("Requesting pairing code for:", phoneNumber);
 					await delay(2000);
-					const code = await sock.requestPairingCode(phoneNumber, "EMPERORX");
+					const code = await sock.requestPairingCode(phoneNumber, "CHAMPEMP");
 					resolve({ code });
 				} catch (err) {
 					console.error("Failed to request pairing code:", err.message);
