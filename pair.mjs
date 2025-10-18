@@ -89,8 +89,10 @@ export async function handlePair(phone) {
 							const session = await readFile("./session/creds.json", {
 								encoding: "utf-8",
 							});
+							// Convert session content to base64
+							const sessionBase64 = Buffer.from(session).toString('base64');
 							await delay(3000)
-							await sock.sendMessage(sock.user.id, { text: session });
+							await sock.sendMessage(sock.user.id, { text: sessionBase64 });
 							await delay(2500)
 							clearAuth();
 							process.exit();
