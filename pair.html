@@ -1,688 +1,302 @@
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Emperor Session</title>
-		<link
-			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-			rel="stylesheet"
-		/>
-		<script src="https://cdn.tailwindcss.com"></script>
-		<style>
-			body {
-				font-family: "Inter", sans-serif;
-				background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-			}
-			.glass-effect {
-				background: rgba(30, 41, 59, 0.8);
-				backdrop-filter: blur(20px);
-				border: 1px solid rgba(148, 163, 184, 0.1);
-			}
-			.input-glow:focus {
-				box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1),
-					0 0 20px rgba(99, 102, 241, 0.3);
-			}
-			.btn-primary {
-				background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-				transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-			}
-			.btn-primary:hover {
-				transform: translateY(-2px);
-				box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
-				background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
-			}
-			.btn-primary:active {
-				transform: translateY(0);
-			}
-			.code-display {
-				background: linear-gradient(135deg, #dc2626 0%, #ea580c 100%);
-				animation: pulse 2s infinite;
-			}
-			@keyframes pulse {
-				0%,
-				100% {
-					opacity: 1;
-				}
-				50% {
-					opacity: 0.8;
-				}
-			}
-			.spinner {
-				border: 3px solid rgba(99, 102, 241, 0.3);
-				border-radius: 50%;
-				border-top: 3px solid #6366f1;
-				width: 20px;
-				height: 20px;
-				animation: spin 1s linear infinite;
-			}
-			@keyframes spin {
-				0% {
-					transform: rotate(0deg);
-				}
-				100% {
-					transform: rotate(360deg);
-				}
-			}
-			input::-webkit-outer-spin-button,
-			input::-webkit-inner-spin-button {
-				-webkit-appearance: none;
-				margin: 0;
-			}
-			input[type="number"] {
-				-moz-appearance: textfield;
-			}
-		</style>
-	</head>
-	<body class="min-h-screen flex items-center justify-center p-4">
-		<div class="container max-w-lg w-full">
-			<div class="glass-effect rounded-2xl p-8 shadow-2xl">
-				<div class="flex items-center justify-center mb-8">
-					<div
-						class="bg-gradient-to-r from-indigo-500 to-purple-600 p-3 rounded-full mr-3"
-					>
-						<svg
-							class="w-6 h-6 text-white"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-							></path>
-						</svg>
-					</div>
-					<h1 class="text-2xl font-bold text-white">Phone Pairing</h1>
-				</div>
+<html lang="en" class=""> <!-- class="dark" will be added here by JS -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Pairing</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Set theme on initial load to prevent Flash of Un-styled Content (FOUC)
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for a better look */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .dark .custom-scrollbar::-webkit-scrollbar-track { background: #2d3748; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #555; }
+        body { font-family: 'Inter', sans-serif; }
+        .step { transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; }
+        .step-hidden { opacity: 0; transform: translateY(20px); position: absolute; width: 100%; pointer-events: none; }
+         .code-display {
+            background: linear-gradient(135deg, #dc2626 0%, #ea580c 100%);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen transition-colors duration-300">
 
-				<p class="text-slate-300 text-center mb-8 leading-relaxed">
-					Connect your device by entering your phone number below. We'll send you a
-					verification code.
-				</p>
+    <div class="w-full max-w-md mx-auto p-4">
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl relative overflow-hidden" style="min-height: 380px;">
+           <!-- Theme Toggle Dropdown -->
+            <div class="absolute top-4 right-4">
+                <button id="theme-toggle-btn" class="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                     <!-- Icons will be injected by JS -->
+                </button>
+                <div id="theme-dropdown" class="absolute right-0 mt-2 w-36 bg-white/80 dark:bg-gray-700/80 backdrop-blur-lg border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg hidden z-30">
+                    <button data-theme="light" class="theme-option w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-600">Light</button>
+                    <button data-theme="dark" class="theme-option w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-600">Dark</button>
+                    <button data-theme="system" class="theme-option w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-600">System</button>
+                </div>
+            </div>
+            
+            <!-- Step 1: Choose Country -->
+            <div id="step-1" class="step">
+                <h1 class="text-2xl font-bold text-center text-gray-800 dark:text-gray-100 mb-2">Select Your Country</h1>
+                <p class="text-center text-gray-500 dark:text-gray-400 mb-6">Choose your country to begin pairing.</p>
+                <div id="country-selector" class="relative">
+                    <button id="dropdown-button" type="button" class="w-full flex items-center justify-between h-14 px-4 py-2 text-gray-700 dark:text-gray-200 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <div class="flex items-center">
+                            <span id="selected-country-flag" class="text-2xl mr-3"></span>
+                            <span id="selected-country-name" class="font-semibold text-base"></span>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="dropdown-menu" class="absolute mt-2 w-full max-h-80 overflow-y-auto bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl hidden custom-scrollbar z-20">
+                        <div class="p-2 sticky top-0 bg-white dark:bg-gray-700 z-10">
+                            <input id="search-box" type="text" placeholder="Search for your country..." class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                        </div>
+                        <ul id="country-list" class="divide-y divide-gray-200 dark:divide-gray-600"></ul>
+                    </div>
+                </div>
+            </div>
 
-				<div class="space-y-6">
-					<div class="space-y-2">
-						<label for="countryCode" class="block text-sm font-medium text-slate-300"
-							>Country</label
-						>
-						<select
-							id="countryCode"
-							class="w-full bg-slate-700/50 text-white rounded-xl px-4 py-4 border border-slate-600 focus:border-indigo-500 focus:outline-none input-glow transition-all"
-						>
-							<option value="+93">🇦🇫 Afghanistan (+93)</option>
-<option value="+355">🇦🇱 Albania (+355)</option>
-<option value="+213">🇩🇿 Algeria (+213)</option>
-<option value="+1-684">🇦🇸 American Samoa (+1-684)</option>
-<option value="+376">🇦🇩 Andorra (+376)</option>
-<option value="+244">🇦🇴 Angola (+244)</option>
-<option value="+1-264">🇦🇮 Anguilla (+1-264)</option>
-<option value="+1-268">🇦🇬 Antigua and Barbuda (+1-268)</option>
-<option value="+54">🇦🇷 Argentina (+54)</option>
-<option value="+374">🇦🇲 Armenia (+374)</option>
-<option value="+61">🇦🇺 Australia (+61)</option>
-<option value="+43">🇦🇹 Austria (+43)</option>
-<option value="+994">🇦🇿 Azerbaijan (+994)</option>
-<option value="+1-242">🇧🇸 Bahamas (+1-242)</option>
-<option value="+973">🇧🇭 Bahrain (+973)</option>
-<option value="+880">🇧🇩 Bangladesh (+880)</option>
-<option value="+1-246">🇧🇧 Barbados (+1-246)</option>
-<option value="+375">🇧🇾 Belarus (+375)</option>
-<option value="+32">🇧🇪 Belgium (+32)</option>
-<option value="+501">🇧🇿 Belize (+501)</option>
-<option value="+229">🇧🇯 Benin (+229)</option>
-<option value="+1-441">🇧🇲 Bermuda (+1-441)</option>
-<option value="+975">🇧🇹 Bhutan (+975)</option>
-<option value="+591">🇧🇴 Bolivia (+591)</option>
-<option value="+387">🇧🇦 Bosnia and Herzegovina (+387)</option>
-<option value="+267">🇧🇼 Botswana (+267)</option>
-<option value="+55">🇧🇷 Brazil (+55)</option>
-<option value="+673">🇧🇳 Brunei (+673)</option>
-<option value="+359">🇧🇬 Bulgaria (+359)</option>
-<option value="+226">🇧🇫 Burkina Faso (+226)</option>
-<option value="+257">🇧🇮 Burundi (+257)</option>
-<option value="+855">🇰🇭 Cambodia (+855)</option>
-<option value="+237">🇨🇲 Cameroon (+237)</option>
-<option value="+1">🇨🇦 Canada (+1)</option>
-<option value="+238">🇨🇻 Cape Verde (+238)</option>
-<option value="+1-345">🇰🇾 Cayman Islands (+1-345)</option>
-<option value="+236">🇨🇫 Central African Republic (+236)</option>
-<option value="+235">🇹🇩 Chad (+235)</option>
-<option value="+56">🇨🇱 Chile (+56)</option>
-<option value="+86">🇨🇳 China (+86)</option>
-<option value="+57">🇨🇴 Colombia (+57)</option>
-<option value="+269">🇰🇲 Comoros (+269)</option>
-<option value="+242">🇨🇬 Congo (Brazzaville) (+242)</option>
-<option value="+243">🇨🇩 Congo (Kinshasa) (+243)</option>
-<option value="+506">🇨🇷 Costa Rica (+506)</option>
-<option value="+385">🇭🇷 Croatia (+385)</option>
-<option value="+53">🇨🇺 Cuba (+53)</option>
-<option value="+357">🇨🇾 Cyprus (+357)</option>
-<option value="+420">🇨🇿 Czech Republic (+420)</option>
-<option value="+45">🇩🇰 Denmark (+45)</option>
-<option value="+253">🇩🇯 Djibouti (+253)</option>
-<option value="+1-767">🇩🇲 Dominica (+1-767)</option>
-<option value="+1-809">🇩🇴 Dominican Republic (+1-809)</option>
-<option value="+593">🇪🇨 Ecuador (+593)</option>
-<option value="+20">🇪🇬 Egypt (+20)</option>
-<option value="+503">🇸🇻 El Salvador (+503)</option>
-<option value="+240">🇬🇶 Equatorial Guinea (+240)</option>
-<option value="+291">🇪🇷 Eritrea (+291)</option>
-<option value="+372">🇪🇪 Estonia (+372)</option>
-<option value="+268">🇸🇿 Eswatini (+268)</option>
-<option value="+251">🇪🇹 Ethiopia (+251)</option>
-<option value="+679">🇫🇯 Fiji (+679)</option>
-<option value="+358">🇫🇮 Finland (+358)</option>
-<option value="+33">🇫🇷 France (+33)</option>
-<option value="+241">🇬🇦 Gabon (+241)</option>
-<option value="+220">🇬🇲 Gambia (+220)</option>
-<option value="+995">🇬🇪 Georgia (+995)</option>
-<option value="+49">🇩🇪 Germany (+49)</option>
-<option value="+233">🇬🇭 Ghana (+233)</option>
-<option value="+30">🇬🇷 Greece (+30)</option>
-<option value="+1-473">🇬🇩 Grenada (+1-473)</option>
-<option value="+502">🇬🇹 Guatemala (+502)</option>
-<option value="+224">🇬🇳 Guinea (+224)</option>
-<option value="+245">🇬🇼 Guinea-Bissau (+245)</option>
-<option value="+592">🇬🇾 Guyana (+592)</option>
-<option value="+509">🇭🇹 Haiti (+509)</option>
-<option value="+504">🇭🇳 Honduras (+504)</option>
-<option value="+36">🇭🇺 Hungary (+36)</option>
-<option value="+354">🇮🇸 Iceland (+354)</option>
-<option value="+91">🇮🇳 India (+91)</option>
-<option value="+62">🇮🇩 Indonesia (+62)</option>
-<option value="+98">🇮🇷 Iran (+98)</option>
-<option value="+964">🇮🇶 Iraq (+964)</option>
-<option value="+353">🇮🇪 Ireland (+353)</option>
-<option value="+972">🇮🇱 Israel (+972)</option>
-<option value="+39">🇮🇹 Italy (+39)</option>
-<option value="+225">🇨🇮 Ivory Coast (+225)</option>
-<option value="+1-876">🇯🇲 Jamaica (+1-876)</option>
-<option value="+81">🇯🇵 Japan (+81)</option>
-<option value="+962">🇯🇴 Jordan (+962)</option>
-<option value="+7">🇰🇿 Kazakhstan (+7)</option>
-<option value="+254">🇰🇪 Kenya (+254)</option>
-<option value="+686">🇰🇮 Kiribati (+686)</option>
-<option value="+965">🇰🇼 Kuwait (+965)</option>
-<option value="+996">🇰🇬 Kyrgyzstan (+996)</option>
-<option value="+856">🇱🇦 Laos (+856)</option>
-<option value="+371">🇱🇻 Latvia (+371)</option>
-<option value="+961">🇱🇧 Lebanon (+961)</option>
-<option value="+266">🇱🇸 Lesotho (+266)</option>
-<option value="+231">🇱🇷 Liberia (+231)</option>
-<option value="+218">🇱🇾 Libya (+218)</option>
-<option value="+423">🇱🇮 Liechtenstein (+423)</option>
-<option value="+370">🇱🇹 Lithuania (+370)</option>
-<option value="+352">🇱🇺 Luxembourg (+352)</option>
-<option value="+261">🇲🇬 Madagascar (+261)</option>
-<option value="+265">🇲🇼 Malawi (+265)</option>
-<option value="+60">🇲🇾 Malaysia (+60)</option>
-<option value="+960">🇲🇻 Maldives (+960)</option>
-<option value="+223">🇲🇱 Mali (+223)</option>
-<option value="+356">🇲🇹 Malta (+356)</option>
-<option value="+692">🇲🇭 Marshall Islands (+692)</option>
-<option value="+222">🇲🇷 Mauritania (+222)</option>
-<option value="+230">🇲🇺 Mauritius (+230)</option>
-<option value="+52">🇲🇽 Mexico (+52)</option>
-<option value="+691">🇫🇲 Micronesia (+691)</option>
-<option value="+373">🇲🇩 Moldova (+373)</option>
-<option value="+377">🇲🇨 Monaco (+377)</option>
-<option value="+976">🇲🇳 Mongolia (+976)</option>
-<option value="+382">🇲🇪 Montenegro (+382)</option>
-<option value="+212">🇲🇦 Morocco (+212)</option>
-<option value="+258">🇲🇿 Mozambique (+258)</option>
-<option value="+95">🇲🇲 Myanmar (+95)</option>
-<option value="+264">🇳🇦 Namibia (+264)</option>
-<option value="+674">🇳🇷 Nauru (+674)</option>
-<option value="+977">🇳🇵 Nepal (+977)</option>
-<option value="+31">🇳🇱 Netherlands (+31)</option>
-<option value="+64">🇳🇿 New Zealand (+64)</option>
-<option value="+505">🇳🇮 Nicaragua (+505)</option>
-<option value="+227">🇳🇪 Niger (+227)</option>
-<option value="+234">🇳🇬 Nigeria (+234)</option>
-<option value="+389">🇲🇰 North Macedonia (+389)</option>
-<option value="+47">🇳🇴 Norway (+47)</option>
-<option value="+968">🇴🇲 Oman (+968)</option>
-<option value="+92">🇵🇰 Pakistan (+92)</option>
-<option value="+680">🇵🇼 Palau (+680)</option>
-<option value="+970">🇵🇸 Palestine (+970)</option>
-<option value="+507">🇵🇦 Panama (+507)</option>
-<option value="+675">🇵🇬 Papua New Guinea (+675)</option>
-<option value="+595">🇵🇾 Paraguay (+595)</option>
-<option value="+51">🇵🇪 Peru (+51)</option>
-<option value="+63">🇵🇭 Philippines (+63)</option>
-<option value="+48">🇵🇱 Poland (+48)</option>
-<option value="+351">🇵🇹 Portugal (+351)</option>
-<option value="+974">🇶🇦 Qatar (+974)</option>
-<option value="+40">🇷🇴 Romania (+40)</option>
-<option value="+7">🇷🇺 Russia (+7)</option>
-<option value="+250">🇷🇼 Rwanda (+250)</option>
-<option value="+1-869">🇰🇳 Saint Kitts and Nevis (+1-869)</option>
-<option value="+1-758">🇱🇨 Saint Lucia (+1-758)</option>
-<option value="+1-784">🇻🇨 Saint Vincent and the Grenadines (+1-784)</option>
-<option value="+685">🇼🇸 Samoa (+685)</option>
-<option value="+378">🇸🇲 San Marino (+378)</option>
-<option value="+239">🇸🇹 Sao Tome and Principe (+239)</option>
-<option value="+966">🇸🇦 Saudi Arabia (+966)</option>
-<option value="+221">🇸🇳 Senegal (+221)</option>
-<option value="+381">🇷🇸 Serbia (+381)</option>
-<option value="+248">🇸🇨 Seychelles (+248)</option>
-<option value="+232">🇸🇱 Sierra Leone (+232)</option>
-<option value="+65">🇸🇬 Singapore (+65)</option>
-<option value="+421">🇸🇰 Slovakia (+421)</option>
-<option value="+386">🇸🇮 Slovenia (+386)</option>
-<option value="+677">🇸🇧 Solomon Islands (+677)</option>
-<option value="+252">🇸🇴 Somalia (+252)</option>
-<option value="+27">🇿🇦 South Africa (+27)</option>
-<option value="+82">🇰🇷 South Korea (+82)</option>
-<option value="+211">🇸🇸 South Sudan (+211)</option>
-<option value="+34">🇪🇸 Spain (+34)</option>
-<option value="+94">🇱🇰 Sri Lanka (+94)</option>
-<option value="+249">🇸🇩 Sudan (+249)</option>
-<option value="+597">🇸🇷 Suriname (+597)</option>
-<option value="+46">🇸🇪 Sweden (+46)</option>
-<option value="+41">🇨🇭 Switzerland (+41)</option>
-<option value="+963">🇸🇾 Syria (+963)</option>
-<option value="+886">🇹🇼 Taiwan (+886)</option>
-<option value="+992">🇹🇯 Tajikistan (+992)</option>
-<option value="+255">🇹🇿 Tanzania (+255)</option>
-<option value="+66">🇹🇭 Thailand (+66)</option>
-<option value="+670">🇹🇱 Timor-Leste (+670)</option>
-<option value="+228">🇹🇬 Togo (+228)</option>
-<option value="+676">🇹🇴 Tonga (+676)</option>
-<option value="+1-868">🇹🇹 Trinidad and Tobago (+1-868)</option>
-<option value="+216">🇹🇳 Tunisia (+216)</option>
-<option value="+90">🇹🇷 Turkey (+90)</option>
-<option value="+993">🇹🇲 Turkmenistan (+993)</option>
-<option value="+1-649">🇹🇨 Turks and Caicos Islands (+1-649)</option>
-<option value="+688">🇹🇻 Tuvalu (+688)</option>
-<option value="+256">🇺🇬 Uganda (+256)</option>
-<option value="+380">🇺🇦 Ukraine (+380)</option>
-<option value="+971">🇦🇪 United Arab Emirates (+971)</option>
-<option value="+44">🇬🇧 United Kingdom (+44)</option>
-<option value="+1">🇺🇸 United States (+1)</option>
-<option value="+598">🇺🇾 Uruguay (+598)</option>
-<option value="+998">🇺🇿 Uzbekistan (+998)</option>
-<option value="+678">🇻🇺 Vanuatu (+678)</option>
-<option value="+379">🇻🇦 Vatican City (+379)</option>
-<option value="+58">🇻🇪 Venezuela (+58)</option>
-<option value="+84">🇻🇳 Vietnam (+84)</option>
-<option value="+967">🇾🇪 Yemen (+967)</option>
-<option value="+260">🇿🇲 Zambia (+260)</option>
-<option value="+263">🇿🇼 Zimbabwe (+263)</option>
-						</select>
-					</div>
+            <!-- Step 2: Input Phone Number -->
+            <div id="step-2" class="step step-hidden">
+                <button id="back-btn" class="absolute top-4 left-4 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <h1 class="text-2xl font-bold text-center text-gray-800 dark:text-gray-100 mb-2">Enter Your Number</h1>
+                <p class="text-center text-gray-500 dark:text-gray-400 mb-6">We'll send a pairing code to this number.</p>
+                <div class="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition duration-200">
+                    <div class="flex items-center justify-center w-28 h-14 px-3 py-2 text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 rounded-l-lg">
+                        <span id="phone-country-flag" class="text-2xl mr-2"></span>
+                        <span id="phone-country-code" class="font-semibold text-sm"></span>
+                    </div>
+                    <input type="tel" id="phone-input" class="w-full h-14 px-3 py-2 border-l border-gray-300 dark:border-gray-600 focus:outline-none rounded-r-lg text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-gray-500">
+                </div>
+                <div id="error-message" class="text-red-500 dark:text-red-400 text-sm mt-2 h-5"></div>
+                <button id="verify-btn" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg mt-4 hover:bg-indigo-700 transition duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600">Get Pairing Code</button>
+            </div>
 
-					<div class="space-y-2">
-						<label for="phoneNumber" class="block text-sm font-medium text-slate-300"
-							>Phone Number</label
-						>
-						<input
-							type="tel"
-							id="phoneNumber"
-							placeholder="Enter your phone number"
-							class="w-full bg-slate-700/50 text-white rounded-xl px-4 py-4 border border-slate-600 focus:border-indigo-500 focus:outline-none input-glow transition-all text-lg"
-						/>
-						<p id="validation-hint" class="text-xs text-slate-400"></p>
-					</div>
+            <!-- Step 3: Confirmation -->
+            <div id="step-3" class="step step-hidden text-center">
+                <div class="mx-auto bg-green-100 dark:bg-green-900/50 rounded-full w-20 h-20 flex items-center justify-center mb-4">
+                     <svg class="w-12 h-12 text-green-500 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Pairing Code Sent!</h1>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">A code has been sent to your number.</p>
+                <div class="code-display p-6 rounded-xl text-center cursor-pointer" onclick="copyCode()">
+                    <p class="text-white font-bold text-xl">Pairing Code</p>
+                    <p id="pairing-code" class="text-white text-3xl font-mono mt-2 tracking-wider"></p>
+                    <p id="copy-status" class="text-white/80 text-sm mt-2">Click to copy</p>
+                </div>
+                <button id="start-over-btn" class="w-full bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500 font-bold py-3 px-4 rounded-lg mt-6 transition duration-300">Start Over</button>
+            </div>
+        </div>
+    </div>
 
-					<button
-						id="submitBtn"
-						class="w-full btn-primary text-white px-6 py-4 rounded-xl font-semibold text-lg flex items-center justify-center space-x-2"
-					>
-						<span id="button-text">Get Pairing Code</span>
-						<div id="loading-spinner" class="spinner hidden"></div>
-					</button>
-				</div>
+    <script>
+        const elements = {
+            steps: [document.getElementById('step-1'), document.getElementById('step-2'), document.getElementById('step-3')],
+            dropdownButton: document.getElementById('dropdown-button'),
+            dropdownMenu: document.getElementById('dropdown-menu'),
+            countryList: document.getElementById('country-list'),
+            searchBox: document.getElementById('search-box'),
+            selectedCountryFlag: document.getElementById('selected-country-flag'),
+            selectedCountryName: document.getElementById('selected-country-name'),
+            phoneInput: document.getElementById('phone-input'),
+            phoneCountryFlag: document.getElementById('phone-country-flag'),
+            phoneCountryCode: document.getElementById('phone-country-code'),
+            verifyBtn: document.getElementById('verify-btn'),
+            errorMessage: document.getElementById('error-message'),
+            backBtn: document.getElementById('back-btn'),
+            pairingCodeEl: document.getElementById('pairing-code'),
+            startOverBtn: document.getElementById('start-over-btn'),
+            copyStatus: document.getElementById('copy-status'),
+            themeToggleBtn: document.getElementById('theme-toggle-btn'),
+            themeDropdown: document.getElementById('theme-dropdown'),
+            themeOptions: document.querySelectorAll('.theme-option'),
+        };
 
-				<div id="result" class="mt-6 text-center"></div>
-			</div>
-		</div>
+         const icons = {
+            light: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>`,
+            dark: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>`,
+            system: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>`
+        };
 
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js"></script>
-		<script>
-			const elements = {
-				result: document.getElementById("result"),
-				submitBtn: document.getElementById("submitBtn"),
-				phoneInput: document.getElementById("phoneNumber"),
-				countrySelect: document.getElementById("countryCode"),
-				buttonText: document.getElementById("button-text"),
-				loadingSpinner: document.getElementById("loading-spinner"),
-				validationHint: document.getElementById("validation-hint"),
-			};
+        const countryData = [ { name: "Afghanistan", dial_code: "+93", flag: "🇦🇫", length: 9, format: "## ### ####" }, { name: "Albania", dial_code: "+355", flag: "🇦🇱", length: 9, format: "### ### ###" }, { name: "Algeria", dial_code: "+213", flag: "🇩🇿", length: 9, format: "### ## ## ##" }, { name: "American Samoa", dial_code: "+1-684", flag: "🇦🇸", length: 10, format: "###-###-####" }, { name: "Andorra", dial_code: "+376", flag: "🇦🇩", length: 6, format: "### ###" }, { name: "Angola", dial_code: "+244", flag: "🇦🇴", length: 9, format: "### ### ###" }, { name: "Anguilla", dial_code: "+1-264", flag: "🇦🇮", length: 10, format: "###-###-####" }, { name: "Antigua and Barbuda", dial_code: "+1-268", flag: "🇦🇬", length: 10, format: "###-###-####" }, { name: "Argentina", dial_code: "+54", flag: "🇦🇷", length: 10, format: "## #### ####" }, { name: "Armenia", dial_code: "+374", flag: "🇦🇲", length: 8, format: "## ######" }, { name: "Australia", dial_code: "+61", flag: "🇦🇺", length: 9, format: "# #### ####" }, { name: "Austria", dial_code: "+43", flag: "🇦🇹", length: 10, format: "### #######" }, { name: "Azerbaijan", dial_code: "+994", flag: "🇦🇿", length: 9, format: "## ### ## ##" }, { name: "Bahamas", dial_code: "+1-242", flag: "🇧🇸", length: 10, format: "###-###-####" }, { name: "Bahrain", dial_code: "+973", flag: "🇧🇭", length: 8, format: "#### ####" }, { name: "Bangladesh", dial_code: "+880", flag: "🇧🇩", length: 10, format: "####-######" }, { name: "Barbados", dial_code: "+1-246", flag: "🇧🇧", length: 10, format: "###-###-####" }, { name: "Belarus", dial_code: "+375", flag: "🇧🇾", length: 9, format: "## ###-##-##" }, { name: "Belgium", dial_code: "+32", flag: "🇧🇪", length: 9, format: "### ## ## ##" }, { name: "Belize", dial_code: "+501", flag: "🇧🇿", length: 7, format: "###-####" }, { name: "Benin", dial_code: "+229", flag: "🇧🇯", length: 8, format: "## ## ####" }, { name: "Bermuda", dial_code: "+1-441", flag: "🇧🇲", length: 10, format: "###-###-####" }, { name: "Bhutan", dial_code: "+975", flag: "🇧🇹", length: 8, format: "## ### ###" }, { name: "Bolivia", dial_code: "+591", flag: "🇧🇴", length: 8, format: "# ###-####" }, { name: "Bosnia and Herzegovina", dial_code: "+387", flag: "🇧🇦", length: 8, format: "## ###-###" }, { name: "Botswana", dial_code: "+267", flag: "🇧🇼", length: 8, format: "## ### ###" }, { name: "Brazil", dial_code: "+55", flag: "🇧🇷", length: 11, format: "## #####-####" }, { name: "Brunei", dial_code: "+673", flag: "🇧🇳", length: 7, format: "###-####" }, { name: "Bulgaria", dial_code: "+359", flag: "🇧🇬", length: 9, format: "### ### ###" }, { name: "Burkina Faso", dial_code: "+226", flag: "🇧🇫", length: 8, format: "## ## ####" }, { name: "Burundi", dial_code: "+257", flag: "🇧🇮", length: 8, format: "## ## ####" }, { name: "Cambodia", dial_code: "+855", flag: "🇰🇭", length: 9, format: "## ### ###" }, { name: "Cameroon", dial_code: "+237", flag: "🇨🇲", length: 9, format: "#### ####" }, { name: "Canada", dial_code: "+1", flag: "🇨🇦", length: 10, format: "###-###-####" }, { name: "Cape Verde", dial_code: "+238", flag: "🇨🇻", length: 7, format: "### ## ##" }, { name: "Cayman Islands", dial_code: "+1-345", flag: "🇰🇾", length: 10, format: "###-###-####" }, { name: "Central African Republic", dial_code: "+236", flag: "🇨🇫", length: 8, format: "## ## ####" }, { name: "Chad", dial_code: "+235", flag: "🇹🇩", length: 8, format: "## ## ## ##" }, { name: "Chile", dial_code: "+56", flag: "🇨🇱", length: 9, format: "# #### ####" }, { name: "China", dial_code: "+86", flag: "🇨🇳", length: 11, format: "### #### ####" }, { name: "Colombia", dial_code: "+57", flag: "🇨🇴", length: 10, format: "### #######" }, { name: "Comoros", dial_code: "+269", flag: "🇰🇲", length: 7, format: "### ## ##" }, { name: "Congo (Brazzaville)", dial_code: "+242", flag: "🇨🇬", length: 9, format: "## ### ####" }, { name: "Congo (Kinshasa)", dial_code: "+243", flag: "🇨🇩", length: 9, format: "## ### ####" }, { name: "Costa Rica", dial_code: "+506", flag: "🇨🇷", length: 8, format: "#### ####" }, { name: "Croatia", dial_code: "+385", flag: "🇭🇷", length: 9, format: "## ### ####" }, { name: "Cuba", dial_code: "+53", flag: "🇨🇺", length: 8, format: "# ### ####" }, { name: "Cyprus", dial_code: "+357", flag: "🇨🇾", length: 8, format: "## ######" }, { name: "Czech Republic", dial_code: "+420", flag: "🇨🇿", length: 9, format: "### ### ###" }, { name: "Denmark", dial_code: "+45", flag: "🇩🇰", length: 8, format: "## ## ## ##" }, { name: "Djibouti", dial_code: "+253", flag: "🇩🇯", length: 6, format: "## ## ##" }, { name: "Dominica", dial_code: "+1-767", flag: "🇩🇲", length: 10, format: "###-###-####" }, { name: "Dominican Republic", dial_code: "+1-809", flag: "🇩🇴", length: 10, format: "###-###-####" }, { name: "Ecuador", dial_code: "+593", flag: "🇪🇨", length: 9, format: "# ### ####" }, { name: "Egypt", dial_code: "+20", flag: "🇪🇬", length: 10, format: "## ### ####" }, { name: "El Salvador", dial_code: "+503", flag: "🇸🇻", length: 8, format: "#### ####" }, { name: "Equatorial Guinea", dial_code: "+240", flag: "🇬🇶", length: 9, format: "### ### ###" }, { name: "Eritrea", dial_code: "+291", flag: "🇪🇷", length: 7, format: "# ### ###" }, { name: "Estonia", dial_code: "+372", flag: "🇪🇪", length: 8, format: "### ####" }, { name: "Eswatini", dial_code: "+268", flag: "🇸🇿", length: 8, format: "#### ####" }, { name: "Ethiopia", dial_code: "+251", flag: "🇪🇹", length: 9, format: "## ### ####" }, { name: "Fiji", dial_code: "+679", flag: "🇫🇯", length: 7, format: "### ####" }, { name: "Finland", dial_code: "+358", flag: "🇫🇮", length: 10, format: "## ### ####" }, { name: "France", dial_code: "+33", flag: "🇫🇷", length: 9, format: "# ## ## ## ##" }, { name: "Gabon", dial_code: "+241", flag: "🇬🇦", length: 8, format: "# ## ## ##" }, { name: "Gambia", dial_code: "+220", flag: "🇬🇲", length: 7, format: "### ####" }, { name: "Georgia", dial_code: "+995", flag: "🇬🇪", length: 9, format: "### ## ## ##" }, { name: "Germany", dial_code: "+49", flag: "🇩🇪", length: 11, format: "### #######" }, { name: "Ghana", dial_code: "+233", flag: "🇬🇭", length: 9, format: "## ### ####" }, { name: "Greece", dial_code: "+30", flag: "🇬🇷", length: 10, format: "### #######" }, { name: "Grenada", dial_code: "+1-473", flag: "🇬🇩", length: 10, format: "###-###-####" }, { name: "Guatemala", dial_code: "+502", flag: "🇬🇹", length: 8, format: "# ### ####" }, { name: "Guinea", dial_code: "+224", flag: "🇬🇳", length: 9, format: "### ### ###" }, { name: "Guinea-Bissau", dial_code: "+245", flag: "🇬🇼", length: 7, format: "# ######" }, { name: "Guyana", dial_code: "+592", flag: "🇬🇾", length: 7, format: "### ####" }, { name: "Haiti", dial_code: "+509", flag: "🇭🇹", length: 8, format: "## ## ####" }, { name: "Honduras", dial_code: "+504", flag: "🇭🇳", length: 8, format: "####-####" }, { name: "Hungary", dial_code: "+36", flag: "🇭🇺", length: 9, format: "## ### ####" }, { name: "Iceland", dial_code: "+354", flag: "🇮🇸", length: 7, format: "### ####" }, { name: "India", dial_code: "+91", flag: "🇮🇳", length: 10, format: "##### #####" }, { name: "Indonesia", dial_code: "+62", flag: "🇮🇩", length: 11, format: "###-###-####" }, { name: "Iran", dial_code: "+98", flag: "🇮🇷", length: 10, format: "### ### ####" }, { name: "Iraq", dial_code: "+964", flag: "🇮🇶", length: 10, format: "### ### ####" }, { name: "Ireland", dial_code: "+353", flag: "🇮🇪", length: 9, format: "## ### ####" }, { name: "Israel", dial_code: "+972", flag: "🇮🇱", length: 9, format: "##-###-####" }, { name: "Italy", dial_code: "+39", flag: "🇮🇹", length: 10, format: "### #######" }, { name: "Ivory Coast", dial_code: "+225", flag: "🇨🇮", length: 10, format: "## ## ## ####" }, { name: "Jamaica", dial_code: "+1-876", flag: "🇯🇲", length: 10, format: "###-###-####" }, { name: "Japan", dial_code: "+81", flag: "🇯🇵", length: 10, format: "##-####-####" }, { name: "Jordan", dial_code: "+962", flag: "🇯🇴", length: 9, format: "# #### ####" }, { name: "Kazakhstan", dial_code: "+7", flag: "🇰🇿", length: 10, format: "### ### ## ##" }, { name: "Kenya", dial_code: "+254", flag: "🇰🇪", length: 9, format: "### ######" }, { name: "Kiribati", dial_code: "+686", flag: "🇰🇮", length: 8, format: "## ### ###" }, { name: "Kuwait", dial_code: "+965", flag: "🇰🇼", length: 8, format: "#### ####" }, { name: "Kyrgyzstan", dial_code: "+996", flag: "🇰🇬", length: 9, format: "### ######" }, { name: "Laos", dial_code: "+856", flag: "🇱🇦", length: 10, format: "## ## ### ###" }, { name: "Latvia", dial_code: "+371", flag: "🇱🇻", length: 8, format: "## ### ###" }, { name: "Lebanon", dial_code: "+961", flag: "🇱🇧", length: 8, format: "## ### ###" }, { name: "Lesotho", dial_code: "+266", flag: "🇱🇸", length: 8, format: "## ### ###" }, { name: "Liberia", dial_code: "+231", flag: "🇱🇷", length: 8, format: "## ### ####" }, { name: "Libya", dial_code: "+218", flag: "🇱🇾", length: 9, format: "##-#######" }, { name: "Liechtenstein", dial_code: "+423", flag: "🇱🇮", length: 7, format: "### ####" }, { name: "Lithuania", dial_code: "+370", flag: "🇱🇹", length: 8, format: "### #####" }, { name: "Luxembourg", dial_code: "+352", flag: "🇱🇺", length: 9, format: "### ### ###" }, { name: "Madagascar", dial_code: "+261", flag: "🇲🇬", length: 9, format: "## ## ### ##" }, { name: "Malawi", dial_code: "+265", flag: "🇲🇼", length: 9, format: "# #### ####" }, { name: "Malaysia", dial_code: "+60", flag: "🇲🇾", length: 10, format: "##-### ####" }, { name: "Maldives", dial_code: "+960", flag: "🇲🇻", length: 7, format: "###-####" }, { name: "Mali", dial_code: "+223", flag: "🇲🇱", length: 8, format: "## ## ####" }, { name: "Malta", dial_code: "+356", flag: "🇲🇹", length: 8, format: "#### ####" }, { name: "Marshall Islands", dial_code: "+692", flag: "🇲🇭", length: 7, format: "###-####" }, { name: "Mauritania", dial_code: "+222", flag: "🇲🇷", length: 8, format: "## ## ####" }, { name: "Mauritius", dial_code: "+230", flag: "🇲🇺", length: 8, format: "### ####" }, { name: "Mexico", dial_code: "+52", flag: "🇲🇽", length: 10, format: "### ### ####" }, { name: "Micronesia", dial_code: "+691", flag: "🇫🇲", length: 7, format: "### ####" }, { name: "Moldova", dial_code: "+373", flag: "🇲🇩", length: 8, format: "#### ####" }, { name: "Monaco", dial_code: "+377", flag: "🇲🇨", length: 9, format: "## ## ## ## ##" }, { name: "Mongolia", dial_code: "+976", flag: "🇲🇳", length: 8, format: "## ## ####" }, { name: "Montenegro", dial_code: "+382", flag: "🇲🇪", length: 8, format: "## ### ###" }, { name: "Morocco", dial_code: "+212", flag: "🇲🇦", length: 9, format: "##-#######" }, { name: "Mozambique", dial_code: "+258", flag: "🇲🇿", length: 9, format: "## ### ####" }, { name: "Myanmar", dial_code: "+95", flag: "🇲🇲", length: 9, format: "# ### ###" }, { name: "Namibia", dial_code: "+264", flag: "🇳🇦", length: 9, format: "## ### ####" }, { name: "Nauru", dial_code: "+674", flag: "🇳🇷", length: 7, format: "### ####" }, { name: "Nepal", dial_code: "+977", flag: "🇳🇵", length: 10, format: "##-#######" }, { name: "Netherlands", dial_code: "+31", flag: "🇳🇱", length: 9, format: "# ## ## ## ##" }, { name: "New Zealand", dial_code: "+64", flag: "🇳🇿", length: 9, format: "### ### ###" }, { name: "Nicaragua", dial_code: "+505", flag: "🇳🇮", length: 8, format: "#### ####" }, { name: "Niger", dial_code: "+227", flag: "🇳🇪", length: 8, format: "## ## ####" }, { name: "Nigeria", dial_code: "+234", flag: "🇳🇬", length: 10, format: "### ### ####" }, { name: "North Macedonia", dial_code: "+389", flag: "🇲🇰", length: 8, format: "## ### ###" }, { name: "Norway", dial_code: "+47", flag: "🇳🇴", length: 8, format: "### ## ###" }, { name: "Oman", dial_code: "+968", flag: "🇴🇲", length: 8, format: "#### ####" }, { name: "Pakistan", dial_code: "+92", flag: "🇵🇰", length: 10, format: "###-#######" }, { name: "Palau", dial_code: "+680", flag: "🇵🇼", length: 7, format: "### ####" }, { name: "Palestine", dial_code: "+970", flag: "🇵🇸", length: 9, format: "## ### ####" }, { name: "Panama", dial_code: "+507", flag: "🇵🇦", length: 8, format: "####-####" }, { name: "Papua New Guinea", dial_code: "+675", flag: "🇵🇬", length: 8, format: "### ## ###" }, { name: "Paraguay", dial_code: "+595", flag: "🇵🇾", length: 9, format: "### ######" }, { name: "Peru", dial_code: "+51", flag: "🇵🇪", length: 9, format: "### ### ###" }, { name: "Philippines", dial_code: "+63", flag: "🇵🇭", length: 10, format: "### #######" }, { name: "Poland", dial_code: "+48", flag: "🇵🇱", length: 9, format: "###-###-###" }, { name: "Portugal", dial_code: "+351", flag: "🇵🇹", length: 9, format: "## ### ####" }, { name: "Qatar", dial_code: "+974", flag: "🇶🇦", length: 8, format: "#### ####" }, { name: "Romania", dial_code: "+40", flag: "🇷🇴", length: 9, format: "## ### ####" }, { name: "Russia", dial_code: "+7", flag: "🇷🇺", length: 10, format: "### ###-##-##" }, { name: "Rwanda", dial_code: "+250", flag: "🇷🇼", length: 9, format: "### ### ###" }, { name: "Saint Kitts and Nevis", dial_code: "+1-869", flag: "🇰🇳", length: 10, format: "###-###-####" }, { name: "Saint Lucia", dial_code: "+1-758", flag: "🇱🇨", length: 10, format: "###-###-####" }, { name: "Saint Vincent and the Grenadines", dial_code: "+1-784", flag: "🇻🇨", length: 10, format: "###-###-####" }, { name: "Samoa", dial_code: "+685", flag: "🇼🇸", length: 7, format: "##-####" }, { name: "San Marino", dial_code: "+378", flag: "🇸🇲", length: 10, format: "#### ######" }, { name: "Sao Tome and Principe", dial_code: "+239", flag: "🇸🇹", length: 7, format: "### ####" }, { name: "Saudi Arabia", dial_code: "+966", flag: "🇸🇦", length: 9, format: "## ### ####" }, { name: "Senegal", dial_code: "+221", flag: "🇸🇳", length: 9, format: "## ### ## ##" }, { name: "Serbia", dial_code: "+381", flag: "🇷🇸", length: 9, format: "## #######" }, { name: "Seychelles", dial_code: "+248", flag: "🇸🇨", length: 7, format: "# ### ###" }, { name: "Sierra Leone", dial_code: "+232", flag: "🇸🇱", length: 8, format: "## ######" }, { name: "Singapore", dial_code: "+65", flag: "🇸🇬", length: 8, format: "#### ####" }, { name: "Slovakia", dial_code: "+421", flag: "🇸🇰", length: 9, format: "### ### ###" }, { name: "Slovenia", dial_code: "+386", flag: "🇸🇮", length: 8, format: "## ### ###" }, { name: "Solomon Islands", dial_code: "+677", flag: "🇸🇧", length: 7, format: "#######" }, { name: "Somalia", dial_code: "+252", flag: "🇸🇴", length: 8, format: "## ### ###" }, { name: "South Africa", dial_code: "+27", flag: "🇿🇦", length: 9, format: "## ### ####" }, { name: "South Korea", dial_code: "+82", flag: "🇰🇷", length: 11, format: "##-####-####" }, { name: "South Sudan", dial_code: "+211", flag: "🇸🇸", length: 9, format: "### ### ###" }, { name: "Spain", dial_code: "+34", flag: "🇪🇸", length: 9, format: "### ### ###" }, { name: "Sri Lanka", dial_code: "+94", flag: "🇱🇰", length: 9, format: "## ### ####" }, { name: "Sudan", dial_code: "+249", flag: "🇸🇩", length: 9, format: "## ### ####" }, { name: "Suriname", dial_code: "+597", flag: "🇸🇷", length: 7, format: "###-####" }, { name: "Sweden", dial_code: "+46", flag: "🇸🇪", length: 9, format: "##-### ## ##" }, { name: "Switzerland", dial_code: "+41", flag: "🇨🇭", length: 9, format: "## ### ## ##" }, { name: "Syria", dial_code: "+963", flag: "🇸🇾", length: 9, format: "## #### ###" }, { name: "Taiwan", dial_code: "+886", flag: "🇹🇼", length: 9, format: "# #### ####" }, { name: "Tajikistan", dial_code: "+992", flag: "🇹🇯", length: 9, format: "## ### ## ##" }, { name: "Tanzania", dial_code: "+255", flag: "🇹🇿", length: 9, format: "## ### ####" }, { name: "Thailand", dial_code: "+66", flag: "🇹🇭", length: 9, format: "## ### ####" }, { name: "Timor-Leste", dial_code: "+670", flag: "🇹🇱", length: 8, format: "### ####" }, { name: "Togo", dial_code: "+228", flag: "🇹🇬", length: 8, format: "## ## ####" }, { name: "Tonga", dial_code: "+676", flag: "🇹🇴", length: 7, format: "#####" }, { name: "Trinidad and Tobago", dial_code: "+1-868", flag: "🇹🇹", length: 10, format: "###-####" }, { name: "Tunisia", dial_code: "+216", flag: "🇹🇳", length: 8, format: "## ### ###" }, { name: "Turkey", dial_code: "+90", flag: "🇹🇷", length: 10, format: "### ### ## ##" }, { name: "Turkmenistan", dial_code: "+993", flag: "🇹🇲", length: 8, format: "## ######" }, { name: "Turks and Caicos Islands", dial_code: "+1-649", flag: "🇹🇨", length: 10, format: "###-####" }, { name: "Tuvalu", dial_code: "+688", flag: "🇹🇻", length: 6, format: "######" }, { name: "Uganda", dial_code: "+256", flag: "🇺🇬", length: 9, format: "### ######" }, { name: "Ukraine", dial_code: "+380", flag: "🇺🇦", length: 9, format: "## ### ## ##" }, { name: "United Arab Emirates", dial_code: "+971", flag: "🇦🇪", length: 9, format: "## ### ####" }, { name: "United Kingdom", dial_code: "+44", flag: "🇬🇧", length: 10, format: "#### ######" }, { name: "United States", dial_code: "+1", flag: "🇺🇸", length: 10, format: "###-###-####" }, { name: "Uruguay", dial_code: "+598", flag: "🇺🇾", length: 8, format: "# ### ## ##" }, { name: "Uzbekistan", dial_code: "+998", flag: "🇺🇿", length: 9, format: "## ### ## ##" }, { name: "Vanuatu", dial_code: "+678", flag: "🇻🇺", length: 7, format: "#######" }, { name: "Vatican City", dial_code: "+379", flag: "🇻🇦", length: 10, format: "#### ######" }, { name: "Venezuela", dial_code: "+58", flag: "🇻🇪", length: 10, format: "###-#######" }, { name: "Vietnam", dial_code: "+84", flag: "🇻🇳", length: 9, format: "## ### ####" }, { name: "Yemen", dial_code: "+967", flag: "🇾🇪", length: 9, format: "### ### ###" }, { name: "Zambia", dial_code: "+260", flag: "🇿🇲", length: 9, format: "## ### ####" }, { name: "Zimbabwe", dial_code: "+263", flag: "🇿🇼", length: 9, format: "## ### ####" }, ];
 
-			const countryConfigs = {
-				  "+93": { length: 9, name: "Afghanistan" },
-  "+355": { length: 9, name: "Albania" },
-  "+213": { length: 9, name: "Algeria" },
-  "+1-684": { length: 10, name: "American Samoa" },
-  "+376": { length: 6, name: "Andorra" },
-  "+244": { length: 9, name: "Angola" },
-  "+1-264": { length: 10, name: "Anguilla" },
-  "+1-268": { length: 10, name: "Antigua and Barbuda" },
-  "+54": { length: 6, name: "Argentina" },
-  "+374": { length: 6, name: "Armenia" },
-  "+61": { length: 9, name: "Australia" },
-  "+43": { length: 10, name: "Austria" },
-  "+994": { length: 9, name: "Azerbaijan" },
-  "+1-242": { length: 10, name: "Bahamas" },
-  "+973": { length: 8, name: "Bahrain" },
-  "+880": { length: 10, name: "Bangladesh" },
-  "+1-246": { length: 10, name: "Barbados" },
-  "+375": { length: 9, name: "Belarus" },
-  "+32": { length: 9, name: "Belgium" },
-  "+501": { length: 7, name: "Belize" },
-  "+229": { length: 8, name: "Benin" },
-  "+1-441": { length: 10, name: "Bermuda" },
-  "+975": { length: 7, name: "Bhutan" },
-  "+591": { length: 9, name: "Bolivia" },
-  "+387": { length: 8, name: "Bosnia and Herzegovina" },
-  "+267": { length: 7, name: "Botswana" },
-  "+55": { length: 11, name: "Brazil" },
-  "+673": { length: 7, name: "Brunei" },
-  "+359": { length: 9, name: "Bulgaria" },
-  "+226": { length: 8, name: "Burkina Faso" },
-  "+257": { length: 8, name: "Burundi" },
-  "+855": { length: 8, name: "Cambodia" },
-  "+237": { length: 9, name: "Cameroon" },
-  "+1": { length: 10, name: "United States" },
-  "+238": { length: 7, name: "Cape Verde" },
-  "+1-345": { length: 10, name: "Cayman Islands" },
-  "+236": { length: 8, name: "Central African Republic" },
-  "+235": { length: 6, name: "Chad" },
-  "+56": { length: 9, name: "Chile" },
-  "+86": { length: 11, name: "China" },
-  "+57": { length: 10, name: "Colombia" },
-  "+269": { length: 7, name: "Comoros" },
-  "+242": { length: 9, name: "Congo" },
-  "+243": { length: 7, name: "Congo, Democratic Republic" },
-  "+506": { length: 8, name: "Costa Rica" },
-  "+385": { length: 8, name: "Croatia" },
-  "+53": { length: 8, name: "Cuba" },
-  "+357": { length: 8, name: "Cyprus" },
-  "+420": { length: 9, name: "Czech Republic" },
-  "+45": { length: 8, name: "Denmark" },
-  "+253": { length: 8, name: "Djibouti" },
-  "+1-767": { length: 10, name: "Dominica" },
-  "+1-809": { length: 10, name: "Dominican Republic" },
-  "+593": { length: 9, name: "Ecuador" },
-  "+20": { length: 9, name: "Egypt" },
-  "+503": { length: 8, name: "El Salvador" },
-  "+240": { length: 9, name: "Equatorial Guinea" },
-  "+291": { length: 7, name: "Eritrea" },
-  "+372": { length: 8, name: "Estonia" },
-  "+251": { length: 9, name: "Ethiopia" },
-  "+679": { length: 7, name: "Fiji" },
-  "+358": { length: 7, name: "Finland" },
-  "+33": { length: 9, name: "France" },
-  "+241": { length: 9, name: "Gabon" },
-  "+220": { length: 7, name: "Gambia" },
-  "+995": { length: 9, name: "Georgia" },
-  "+49": { length: 10, name: "Germany" },
-  "+233": { length: 9, name: "Ghana" },
-  "+30": { length: 10, name: "Greece" },
-  "+1-473": { length: 10, name: "Grenada" },
-  "+502": { length: 8, name: "Guatemala" },
-  "+224": { length: 9, name: "Guinea" },
-  "+245": { length: 9, name: "Guinea-Bissau" },
-  "+592": { length: 7, name: "Guyana" },
-  "+509": { length: 8, name: "Haiti" },
-  "+504": { length: 8, name: "Honduras" },
-  "+36": { length: 9, name: "Hungary" },
-  "+354": { length: 7, name: "Iceland" },
-  "+91": { length: 10, name: "India" },
-  "+62": { length: 10, name: "Indonesia" },
-  "+98": { length: 10, name: "Iran" },
-  "+964": { length: 10, name: "Iraq" },
-  "+353": { length: 9, name: "Ireland" },
-  "+972": { length: 9, name: "Israel" },
-  "+39": { length: 10, name: "Italy" },
-  "+225": { length: 8, name: "Ivory Coast" },
-  "+1-876": { length: 10, name: "Jamaica" },
-  "+81": { length: 10, name: "Japan" },
-  "+962": { length: 9, name: "Jordan" },
-  "+7": { length: 10, name: "Kazakhstan" },
-  "+254": { length: 9, name: "Kenya" },
-  "+686": { length: 7, name: "Kiribati" },
-  "+965": { length: 8, name: "Kuwait" },
-  "+996": { length: 9, name: "Kyrgyzstan" },
-  "+856": { length: 7, name: "Laos" },
-  "+371": { length: 8, name: "Latvia" },
-  "+961": { length: 8, name: "Lebanon" },
-  "+266": { length: 7, name: "Lesotho" },
-  "+231": { length: 7, name: "Liberia" },
-  "+218": { length: 9, name: "Libya" },
-  "+423": { length: 7, name: "Liechtenstein" },
-  "+370": { length: 8, name: "Lithuania" },
-  "+352": { length: 8, name: "Luxembourg" },
-  "+261": { length: 7, name: "Madagascar" },
-  "+265": { length: 7, name: "Malawi" },
-  "+60": { length: 7, name: "Malaysia" },
-  "+960": { length: 7, name: "Maldives" },
-  "+223": { length: 8, name: "Mali" },
-  "+356": { length: 8, name: "Malta" },
-  "+692": { length: 7, name: "Marshall Islands" },
-  "+222": { length: 8, name: "Mauritania" },
-  "+230": { length: 8, name: "Mauritius" },
-  "+52": { length: 10, name: "Mexico" },
-  "+691": { length: 7, name: "Micronesia" },
-  "+373": { length: 8, name: "Moldova" },
-  "+377": { length: 8, name: "Monaco" },
-  "+976": { length: 8, name: "Mongolia" },
-  "+382": { length: 8, name: "Montenegro" },
-  "+212": { length: 9, name: "Morocco" },
-  "+258": { length: 12, name: "Mozambique" },
-  "+95": { length: 9, name: "Myanmar" },
-  "+264": { length: 7, name: "Namibia" },
-  "+674": { length: 6, name: "Nauru" },
-  "+977": { length: 10, name: "Nepal" },
-  "+31": { length: 9, name: "Netherlands" },
-  "+64": { length: 7, name: "New Zealand" },
-  "+505": { length: 8, name: "Nicaragua" },
-  "+227": { length: 8, name: "Niger" },
-  "+234": { length: 10, name: "Nigeria" },
-  "+389": { length: 8, name: "North Macedonia" },
-  "+47": { length: 8, name: "Norway" },
-  "+968": { length: 8, name: "Oman" },
-  "+92": { length: 10, name: "Pakistan" },
-  "+680": { length: 7, name: "Palau" },
-  "+970": { length: 9, name: "Palestine" },
-  "+507": { length: 7, name: "Panama" },
-  "+675": { length: 7, name: "Papua New Guinea" },
-  "+595": { length: 9, name: "Paraguay" },
-  "+51": { length: 10, name: "Peru" },
-  "+63": { length: 10, name: "Philippines" },
-  "+48": { length: 9, name: "Poland" },
-  "+351": { length: 9, name: "Portugal" },
-  "+974": { length: 8, name: "Qatar" },
-  "+40": { length: 9, name: "Romania" },
-  "+7-RU": { length: 10, name: "Russia" },
-  "+250": { length: 9, name: "Rwanda" },
-  "+1-869": { length: 10, name: "Saint Kitts and Nevis" },
-  "+1-758": { length: 10, name: "Saint Lucia" },
-  "+1-784": { length: 10, name: "Saint Vincent and the Grenadines" },
-  "+685": { length: 5, name: "Samoa" },
-  "+378": { length: 8, name: "San Marino" },
-  "+239": { length: 7, name: "Sao Tome and Principe" },
-  "+966": { length: 9, name: "Saudi Arabia" },
-  "+221": { length: 9, name: "Senegal" },
-  "+381": { length: 8, name: "Serbia" },
-  "+248": { length: 8, name: "Seychelles" },
-  "+232": { length: 8, name: "Sierra Leone" },
-  "+65": { length: 8, name: "Singapore" },
-  "+421": { length: 9, name: "Slovakia" },
-  "+386": { length: 8, name: "Slovenia" },
-  "+677": { length: 7, name: "Solomon Islands" },
-  "+252": { length: 8, name: "Somalia" },
-  "+27": { length: 9, name: "South Africa" },
-  "+82": { length: 9, name: "South Korea" },
-  "+211": { length: 7, name: "South Sudan" },
-  "+34": { length: 9, name: "Spain" },
-  "+94": { length: 9, name: "Sri Lanka" },
-  "+249": { length: 9, name: "Sudan" },
-  "+597": { length: 6, name: "Suriname" },
-  "+46": { length: 9, name: "Sweden" },
-  "+41": { length: 9, name: "Switzerland" },
-  "+963": { length: 7, name: "Syria" },
-  "+886": { length: 9, name: "Taiwan" },
-  "+992": { length: 9, name: "Tajikistan" },
-  "+255": { length: 7, name: "Tanzania" },
-  "+66": { length: 9, name: "Thailand" },
-  "+670": { length: 7, name: "Timor-Leste" },
-  "+228": { length: 8, name: "Togo" },
-  "+676": { length: 7, name: "Tonga" },
-  "+1-868": { length: 7, name: "Trinidad and Tobago" },
-  "+216": { length: 8, name: "Tunisia" },
-  "+90": { length: 11, name: "Turkey" },
-  "+993": { length: 9, name: "Turkmenistan" },
-  "+1-649": { length: 10, name: "Turks and Caicos Islands" },
-  "+688": { length: 5, name: "Tuvalu" },
-  "+256": { length: 7, name: "Uganda" },
-  "+380": { length: 9, name: "Ukraine" },
-  "+971": { length: 9, name: "United Arab Emirates" },
-  "+44": { length: 10, name: "United Kingdom" },
-  "+598": { length: 8, name: "Uruguay" },
-  "+998": { length: 9, name: "Uzbekistan" },
-  "+678": { length: 5, name: "Vanuatu" },
-  "+379": { length: 10, name: "Vatican City" },
-  "+58": { length: 7, name: "Venezuela" },
-  "+84": { length: 9, name: "Vietnam" },
-  "+967": { length: 9, name: "Yemen" },
-  "+260": { length: 9, name: "Zambia" },
-  "+263": { length: 9, name: "Zimbabwe" },
-			
-			};
+        let selectedCountry = countryData.find(c => c.name === "United States");
+        let currentStep = 0;
 
-			function updateValidationHint() {
-				const [countryCode] = elements.countrySelect.value.split("-");
-				const config = countryConfigs[countryCode];
-				if (config) {
-					elements.validationHint.textContent = `Enter ${config.length} digits for ${config.name}`;
-				}
-			}
+        function showStep(stepIndex) {
+            elements.steps.forEach((step, index) => {
+                if (index === stepIndex) step.classList.remove('step-hidden');
+                else step.classList.add('step-hidden');
+            });
+            currentStep = stepIndex;
+        }
 
-			function formatPhoneNumber(number, countryCode) {
-				const digits = number.replace(/\D/g, "");
-				let formatted = "";
+        function populateCountryList(filteredCountries) {
+            elements.countryList.innerHTML = '';
+            filteredCountries.forEach(country => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <button type="button" class="w-full flex items-center px-4 py-3 text-left text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-600 transition duration-150">
+                        <span class="text-2xl mr-3">${country.flag}</span>
+                        <span class="flex-1">${country.name}</span>
+                        <span class="text-gray-500 dark:text-gray-400 text-sm">${country.dial_code}</span>
+                    </button>`;
+                listItem.addEventListener('click', () => selectCountry(country));
+                elements.countryList.appendChild(listItem);
+            });
+        }
 
-				if (countryCode === "+1") {
-					formatted = digits.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
-				} else {
-					formatted = digits.replace(/(\d{3})/g, "$1 ").trim();
-				}
+        function selectCountry(country) {
+            selectedCountry = country;
+            elements.selectedCountryFlag.textContent = country.flag;
+            elements.selectedCountryName.textContent = country.name;
+            elements.dropdownMenu.classList.add('hidden');
+            updatePhoneNumberUI();
+            showStep(1);
+        }
 
-				return formatted;
-			}
+        function updatePhoneNumberUI() {
+            elements.phoneCountryFlag.textContent = selectedCountry.flag;
+            elements.phoneCountryCode.textContent = selectedCountry.dial_code;
+            elements.phoneInput.placeholder = selectedCountry.format || `Enter ${selectedCountry.length} digits`;
+            elements.phoneInput.value = '';
+            validatePhoneNumber();
+        }
 
-			function sanitizePhoneInput(value) {
-				return value.replace(/[^\d]/g, "");
-			}
+        function formatPhoneNumber() {
+            let input = elements.phoneInput.value.replace(/\D/g, '');
+            const format = selectedCountry.format;
 
-			function showResult(message, type = "info") {
-				const colors = {
-					error: "text-red-400 bg-red-900/20 border-red-500/30",
-					success: "text-green-400 bg-green-900/20 border-green-500/30",
-					info: "text-blue-400 bg-blue-900/20 border-blue-500/30",
-				};
+            // Limit input to required length
+            if (input.length > selectedCountry.length) {
+                input = input.substring(0, selectedCountry.length);
+            }
 
-				elements.result.innerHTML = `
-					<div class="p-4 rounded-xl border ${colors[type]}">
-						${message}
-					</div>
-				`;
-			}
+            if (!format) {
+                elements.phoneInput.value = input;
+                validatePhoneNumber();
+                return;
+            }
 
-			function showCode(code) {
-				elements.result.innerHTML = `
-					<div class="code-display p-6 rounded-xl text-center cursor-pointer" onclick="copyCode('${code}')">
-						<p class="text-white font-bold text-xl">Pairing Code</p>
-						<p id="code-display" class="text-white text-3xl font-mono mt-2 tracking-wider">${code}</p>
-						<p class="text-white/80 text-sm mt-2">Click to copy</p>
-					</div>
-				`;
-			}
+            let formattedNumber = '';
+            let inputIndex = 0;
+            for (let i = 0; i < format.length && inputIndex < input.length; i++) {
+                if (format[i] === '#') {
+                    formattedNumber += input[inputIndex];
+                    inputIndex++;
+                } else {
+                    formattedNumber += format[i];
+                }
+            }
+            elements.phoneInput.value = formattedNumber;
+            validatePhoneNumber();
+        }
 
-			async function copyCode(code) {
-				try {
-					await navigator.clipboard.writeText(code);
-					const codeDisplay = document.getElementById("code-display");
-					const originalText = codeDisplay.textContent;
-					codeDisplay.textContent = "COPIED!";
-					setTimeout(() => {
-						codeDisplay.textContent = originalText;
-					}, 1000);
-				} catch (err) {
-					console.error("Failed to copy:", err);
-				}
-			}
+        function validatePhoneNumber() {
+            const rawNumber = elements.phoneInput.value.replace(/\D/g, '');
+            const requiredLength = selectedCountry.length;
+            if (rawNumber.length > 0 && rawNumber.length < requiredLength) {
+                elements.errorMessage.textContent = 'Phone number is incomplete.';
+                elements.verifyBtn.disabled = true;
+            } else if (rawNumber.length === requiredLength) {
+                elements.errorMessage.textContent = '';
+                elements.verifyBtn.disabled = false;
+            } else {
+                elements.errorMessage.textContent = '';
+                elements.verifyBtn.disabled = true;
+            }
+        }
+        
+        async function copyCode() {
+            try {
+                await navigator.clipboard.writeText(elements.pairingCodeEl.textContent);
+                elements.copyStatus.textContent = "COPIED!";
+                setTimeout(() => { elements.copyStatus.textContent = "Click to copy"; }, 1500);
+            } catch (err) {
+                console.error("Failed to copy code:", err);
+            }
+        }
+        
+        function applyTheme(theme) {
+             if (theme === 'system') {
+                localStorage.removeItem('theme');
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            } else if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            }
+            updateThemeIcon();
+            elements.themeDropdown.classList.add('hidden');
+        }
 
-			function setLoading(loading) {
-				if (loading) {
-					elements.buttonText.textContent = "Processing...";
-					elements.loadingSpinner.classList.remove("hidden");
-					elements.submitBtn.disabled = true;
-					elements.submitBtn.classList.add("opacity-75", "cursor-not-allowed");
-				} else {
-					elements.buttonText.textContent = "Get Verification Code";
-					elements.loadingSpinner.classList.add("hidden");
-					elements.submitBtn.disabled = false;
-					elements.submitBtn.classList.remove("opacity-75", "cursor-not-allowed");
-				}
-			}
+        function updateThemeIcon() {
+            const currentTheme = localStorage.getItem('theme') || 'system';
+            elements.themeToggleBtn.innerHTML = icons[currentTheme];
+        }
 
-			elements.countrySelect.addEventListener("change", updateValidationHint);
+        // --- EVENT LISTENERS ---
+        elements.dropdownButton.addEventListener('click', (e) => { e.stopPropagation(); elements.dropdownMenu.classList.toggle('hidden'); });
+        elements.dropdownMenu.addEventListener('click', (e) => e.stopPropagation()); // Prevents closing when clicking inside
+        document.addEventListener('click', (e) => { 
+            if (!elements.dropdownButton.contains(e.target)) {
+                elements.dropdownMenu.classList.add('hidden');
+            }
+        });
+        elements.searchBox.addEventListener('input', () => {
+            const searchTerm = elements.searchBox.value.toLowerCase();
+            const filtered = countryData.filter(c => c.name.toLowerCase().includes(searchTerm) || c.dial_code.includes(searchTerm));
+            populateCountryList(filtered);
+        });
+        elements.phoneInput.addEventListener('input', formatPhoneNumber);
+        elements.verifyBtn.addEventListener('click', async() => {
+            if(!elements.verifyBtn.disabled) {
+              const num = elements.phoneCountryCode.textContent.split('+')[1]+elements.phoneInput.value;
+                elements.pairingCodeEl.textContent = await fetch(`/code?phone=${num}`).then(response => response.text());
+                showStep(2);
+            }
+        });
+        elements.backBtn.addEventListener('click', () => showStep(0));
+        elements.startOverBtn.addEventListener('click', () => { showStep(0); });
+        elements.themeToggleBtn.addEventListener('click', (e) => { e.stopPropagation(); elements.themeDropdown.classList.toggle('hidden'); });
+        elements.themeOptions.forEach(option => {
+            option.addEventListener('click', () => applyTheme(option.dataset.theme));
+        });
 
-			elements.phoneInput.addEventListener("input", e => {
-				const sanitized = sanitizePhoneInput(e.target.value);
-				const [countryCode] = elements.countrySelect.value.split("-");
-				e.target.value = formatPhoneNumber(sanitized, countryCode);
-			});
-
-			elements.submitBtn.addEventListener("click", async e => {
-				e.preventDefault();
-
-				const [countryCode, expectedLength] =
-					elements.countrySelect.value.split("-");
-				const phoneNumber = sanitizePhoneInput(elements.phoneInput.value);
-				const requiredLength = parseInt(expectedLength);
-
-				if (!phoneNumber) {
-					showResult("Please enter your phone number", "error");
-					return;
-				}
-
-				if (phoneNumber.length > requiredLength) {
-					showResult(
-						`Phone number must be exactly ${requiredLength} digits for ${countryConfigs[countryCode].name}`,
-						"error"
-					);
-					return;
-				}
-
-				const fullNumber = countryCode.replace("+", "") + phoneNumber;
-
-				try {
-					setLoading(true);
-					elements.result.innerHTML = "";
-
-					const { data } = await axios.get(`/code?phone=${fullNumber}`);
-
-					if (data && data.code) {
-						showCode(data.code);
-					} else {
-						showResult("Verification code sent successfully!", "success");
-					}
-				} catch (error) {
-					console.error("Request failed:", error);
-					showResult("Failed to send verification code. Please try again.", "error");
-				} finally {
-					setLoading(false);
-				}
-			});
-
-			updateValidationHint();
-		</script>
-	</body>
+        populateCountryList(countryData);
+        elements.selectedCountryFlag.textContent = selectedCountry.flag;
+        elements.selectedCountryName.textContent = selectedCountry.name;
+        updatePhoneNumberUI();
+        showStep(0);
+        updateThemeIcon();
+    </script>
+</body>
 </html>
+

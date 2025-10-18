@@ -35,8 +35,8 @@ export const handlePairRequest = async (req, res) => {
 	console.log(`📞 Spawning with phone: ${phone}`);
 
 	try {
-		const result = JSON.stringify(await handlePair(phone));
-		res.writeHead(200, { "Content-Type": "application/json" });
+		const result = await handlePair(phone);
+		res.writeHead(200);
 		res.end(result);
 	} catch (error) {
 		console.log("❌ Handler error:", error.message);

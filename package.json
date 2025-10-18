@@ -1,5 +1,5 @@
 {
-	"description": "qr",
+	"description": "pairing",
 	"main": "./server.mjs",
 	"type": "module",
 	"scripts": {
@@ -9,11 +9,6 @@
 	"license": "GPL-3.0 license",
 	"dependencies": {
 		"@hapi/boom": "^10.0.1",
-		"baileys": "https://github.com/WhiskeySockets/Baileys/releases/download/nightly/baileys-nightly.tgz",
-		"pino": "^8.1.0",
-		"qrcode": "^1.5.3"
-	},
-	"devDependencies": {
-		"@types/qrcode": "^1.5.5"
+		"baileys": "github:WhiskeySockets/Baileys"
 	}
 }

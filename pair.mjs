@@ -1,18 +1,14 @@
 import {
-	Browsers,
 	delay,
 	DisconnectReason,
-	fetchLatestBaileysVersion,
-	makeCacheableSignalKeyStore,
 	makeWASocket,
 	useMultiFileAuthState,
 } from "baileys";
 import { Boom } from "@hapi/boom";
-import P from "pino";
 import fs, { readFileSync } from "fs";
 import pathModule from "path";
+import { readFile } from "fs/promises";
 
-const logger = P.pino({ level: "silent" });
 
 function clearAuth(path = "session") {
 	if (fs.existsSync(path)) {
@@ -47,17 +43,8 @@ export async function handlePair(phone) {
 
 	try {
 		const { state, saveCreds } = await useMultiFileAuthState("session");
-		const { version } = await fetchLatestBaileysVersion();
 		const sock = makeWASocket({
-			auth: {
-				creds: state.creds,
-				keys: makeCacheableSignalKeyStore(state.keys, logger),
-			},
-			logger,
-			version,
-			browser: Browsers.windows("Firefox"),
-			syncFullHistory: false,
-			emitOwnEvents: true,
+			auth: state
 		});
 
 		return new Promise(async (resolve, reject) => {
@@ -98,14 +85,15 @@ export async function handlePair(phone) {
 					if (connection === "open") {
 						try {
 							console.log("Connection opened, sending session");
-							await delay(5000);
-							const session = readFileSync("./session/creds.json", {
+							await delay(10000);
+							const session = await readFile("./session/creds.json", {
 								encoding: "utf-8",
 							});
+							await delay(3000)
 							await sock.sendMessage(sock.user.id, { text: session });
+							await delay(2500)
 							clearAuth();
 							process.exit();
-							resolve({ success: true, session });
 						} catch (err) {
 							console.error("Failed to process session:", err.message);
 							reject({ error: `Failed to process session: ${err.message}` });
@@ -119,7 +107,7 @@ export async function handlePair(phone) {
 					console.log("Requesting pairing code for:", phoneNumber);
 					await delay(2000);
 					const code = await sock.requestPairingCode(phoneNumber, "CHAMPEMP");
-					resolve({ code });
+					resolve(code);
 				} catch (err) {
 					console.error("Failed to request pairing code:", err.message);
 					reject({ error: `Failed to request pairing code: ${err.message}` });
