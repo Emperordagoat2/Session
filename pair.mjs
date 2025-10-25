@@ -1,11 +1,12 @@
 import {
 	delay,
 	DisconnectReason,
+	jidNormalizedUser,
 	makeWASocket,
 	useMultiFileAuthState,
 } from "baileys";
 import { Boom } from "@hapi/boom";
-import fs, { readFileSync } from "fs";
+import fs from "fs";
 import pathModule from "path";
 import { readFile } from "fs/promises";
 
@@ -84,23 +85,20 @@ export async function handlePair(phone) {
 
 					if (connection === "open") {
 						try {
-							console.log("Connection opened, sending session");
 							await delay(10000);
-							const session = await readFile("./session/creds.json", {
-								encoding: "utf-8",
-							});
-							// Convert session content to base64
-							const sessionBase64 = Buffer.from(session).toString('base64');
-							await delay(3000)
-							await sock.sendMessage(sock.user.id, { text: sessionBase64 });
-							await delay(2500)
+							const session = await readFile("./session/creds.json", { encoding: "utf-8" });
+							const text = Buffer.from(session).toString('base64');
+							await delay(3000);
+							const recipientId = jidNormalizedUser(sock.user.id || sock.user.phoneNumber | sock.user.lid)
+							await sock.sendMessage(recipientId, { text: `NOVA---${text}` });
 							clearAuth();
 							process.exit();
 						} catch (err) {
-							console.error("Failed to process session:", err.message);
-							reject({ error: `Failed to process session: ${err.message}` });
+							console.error("Failed to process session:", err);
+							// reject({ error: `Failed to process session: ${err.message}` });
 						}
 					}
+
 				}
 			});
 
