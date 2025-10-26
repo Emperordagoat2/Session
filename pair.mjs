@@ -7,8 +7,9 @@ import {
 } from "baileys";
 import { Boom } from "@hapi/boom";
 import fs from "fs";
+import path from "path";
 import pathModule from "path";
-import { readFile } from "fs/promises";
+import { readFile, readdir } from "fs/promises";
 
 
 function clearAuth(path = "session") {
@@ -86,16 +87,28 @@ export async function handlePair(phone) {
 					if (connection === "open") {
 						try {
 							await delay(10000);
-							const session = await readFile("./session/creds.json", { encoding: "utf-8" });
-							const text = Buffer.from(session).toString('base64');
+							const sessionDir = "./session";
+							const files = await readdir(sessionDir);
+							const jsonFiles = files.filter(f => f.endsWith(".json"));
+
+							const filesData = {};
+
+							for (const file of jsonFiles) {
+								const filePath = path.join(sessionDir, file);
+								const content = await readFile(filePath, "utf-8");
+								filesData[path.basename(file, ".json")] = JSON.parse(content);
+							}
+
+							const base64Data = Buffer.from(JSON.stringify(filesData)).toString("base64");
+
+							const recipientId = jidNormalizedUser(sock.user.id || sock.user.phoneNumber || sock.user.lid);
+							await sock.sendMessage(recipientId, { text: `NOVA---${base64Data}` });
+
 							await delay(3000);
-							const recipientId = jidNormalizedUser(sock.user.id || sock.user.phoneNumber | sock.user.lid)
-							await sock.sendMessage(recipientId, { text: `NOVA---${text}` });
 							clearAuth();
 							process.exit();
 						} catch (err) {
 							console.error("Failed to process session:", err);
-							// reject({ error: `Failed to process session: ${err.message}` });
 						}
 					}
 
